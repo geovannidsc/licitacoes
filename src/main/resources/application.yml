@@ -1,0 +1,12 @@
+spring:
+  jpa:
+    open-in-view: true
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.community.dialect.SQLiteDialect
+  datasource:
+    url: jdbc:sqlite:licitacoes.db
+    driverClassName: org.sqlite.JDBC
