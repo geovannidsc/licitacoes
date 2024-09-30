@@ -1,9 +1,21 @@
 package com.effecti.licitacoes.model;
 
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import java.util.Objects;
 
+
+@Entity
+@Table(name = "licitacoes")
 public class Licitacao {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String numeroPregao;
 
     private String orgaoResponsavel;
     private String setorSolicitante;
@@ -21,7 +33,8 @@ public class Licitacao {
     }
 
 
-    public Licitacao(String orgaoResponsavel, String setorSolicitante, String pregao, String objeto, String telefone, String endereco, String editalAPartirDe, String entregaProposta, LocalDate dataEntregaProposta, String codigoUasg, boolean lida) {
+    public Licitacao(String numeroPregao, String orgaoResponsavel, String setorSolicitante, String pregao, String objeto, String telefone, String endereco, String editalAPartirDe, String entregaProposta, LocalDate dataEntregaProposta, String codigoUasg, boolean lida) {
+        this.numeroPregao = numeroPregao;
         this.orgaoResponsavel = orgaoResponsavel;
         this.setorSolicitante = setorSolicitante;
         this.pregao = pregao;
@@ -34,7 +47,6 @@ public class Licitacao {
         this.codigoUasg = codigoUasg;
         this.lida = lida;
     }
-
 
     public String getOrgaoResponsavel() {
         return orgaoResponsavel;
@@ -58,6 +70,14 @@ public class Licitacao {
 
     public void setPregao(String pregao) {
         this.pregao = pregao;
+    }
+
+    public String getNumeroPregao() {
+        return numeroPregao;
+    }
+
+    public void setNumeroPregao(String numeroPregao) {
+        this.numeroPregao = numeroPregao;
     }
 
     public String getObjeto() {
@@ -145,6 +165,7 @@ public class Licitacao {
                 " Setor: '" + setorSolicitante + "'\n" +
                 " Código da UASG: '" + codigoUasg + "'\n" +
                 " Pregão: '" + pregao + "'\n" +
+                " Número do Pregão: '" + numeroPregao + "'\n" +
                 " Objeto: '" + objeto + "'\n" +
                 " Telefone: '" + telefone + "'\n" +
                 " Endereço: '" + endereco + "'\n" +

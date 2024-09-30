@@ -2,18 +2,22 @@ package com.effecti.licitacoes.scraper;
 
 import com.effecti.licitacoes.http.IHttpClient;
 import com.effecti.licitacoes.model.Licitacao;
+import com.effecti.licitacoes.service.LicitacaoService;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Component
 public class ComprasNetLicitacaoScraper implements ILicitacaoScraper {
 
     private final IHttpClient httpClient;
+
 
     public ComprasNetLicitacaoScraper(IHttpClient httpClient) {
         this.httpClient = httpClient;
@@ -33,14 +37,14 @@ public class ComprasNetLicitacaoScraper implements ILicitacaoScraper {
                 if (boldElements.size() >= 3) {
                     Licitacao licitacao = new Licitacao();
                     analisarElementosEmNegrito(boldElements, licitacao);
+                    licitacao.setNumeroPregao(extrairNumeroPregao(licitacao.getPregao()));
                     licitacoes.add(licitacao);
-                    imprimirLicitacao(licitacao);
+                    //imprimirLicitacao(licitacao);
                 }
             }
         } catch (Exception e) {
             System.err.println("Erro ao capturar licitações: " + e.getMessage());
         }
-
         return licitacoes;
     }
 
@@ -94,6 +98,19 @@ public class ComprasNetLicitacaoScraper implements ILicitacaoScraper {
         }
         return "Não informado";
     }
+
+    private String extrairNumeroPregao(String texto) {
+        Pattern pattern = Pattern.compile("(\\d{5}/\\d{4})");
+        Matcher matcher = pattern.matcher(texto);
+
+        if (matcher.find()) {
+            return matcher.group(1);
+        } else {
+            return "Não informado";
+        }
+    }
+
+
 
     private void imprimirLicitacao(Licitacao licitacao) {
         System.out.println(licitacao.toString());
