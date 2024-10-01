@@ -9,4 +9,6 @@ public interface LicitacaoRepository extends JpaRepository<Licitacao, Long> {
 
     boolean existsByNumeroPregao(String numeroPregao);
 
+    boolean existsByNumeroPregaoAndCodigoUasg(String numeroPregao, String codigoUasg);
+
 }

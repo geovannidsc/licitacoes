@@ -6,7 +6,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.io.IOException;
 
 @SpringBootApplication
 public class LicitacoesApplication implements CommandLineRunner {
@@ -22,11 +21,11 @@ public class LicitacoesApplication implements CommandLineRunner {
 	public void run(String... args) {
 
 
-		final String comprasNetUrl = "http://comprasnet.gov.br/ConsultaLicitacoes/ConsLicitacaoDia.asp";
+		final String urlBase = "http://comprasnet.gov.br/ConsultaLicitacoes/ConsLicitacaoDia.asp?pagina=";
 		String paginahtml = "file:///C:\\Users\\Geovanni\\Desktop\\Codigos\\licitacoes\\src\\main\\resources\\comprasnet.html";
 
 		try {
-			licitacaoService.buscarNovasLicitacoes(paginahtml);
+			licitacaoService.buscarNovasLicitacoes(urlBase);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

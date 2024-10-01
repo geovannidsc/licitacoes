@@ -14,7 +14,6 @@ public class Licitacao {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
     private String numeroPregao;
 
     private String orgaoResponsavel;
@@ -26,6 +25,7 @@ public class Licitacao {
     private String editalAPartirDe;
     private String entregaProposta;
     private LocalDate dataEntregaProposta;
+
     private String codigoUasg;
     private boolean lida;
 

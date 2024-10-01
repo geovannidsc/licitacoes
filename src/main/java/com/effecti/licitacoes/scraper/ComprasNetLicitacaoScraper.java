@@ -2,7 +2,6 @@ package com.effecti.licitacoes.scraper;
 
 import com.effecti.licitacoes.http.IHttpClient;
 import com.effecti.licitacoes.model.Licitacao;
-import com.effecti.licitacoes.service.LicitacaoService;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -24,27 +23,56 @@ public class ComprasNetLicitacaoScraper implements ILicitacaoScraper {
     }
 
     @Override
-    public List<Licitacao> buscarLicitacoes(String source) {
+    public List<Licitacao> buscarLicitacoes(String urlBase) {
         List<Licitacao> licitacoes = new ArrayList<>();
+        int paginaAtual = 1;
+        boolean continuarPaginar = true;
 
         try {
-            Document doc = httpClient.getDocument(source);
-            Elements rows = doc.select("table tr");
+            // Obter conteúdo da página 1 para comparações futuras
+            Document primeiraPagina = httpClient.getDocument(urlBase + 1);
+            String conteudoPrimeiraPagina = primeiraPagina.body().text(); // Extrair o texto da primeira página
 
-            for (Element row : rows) {
-                Elements boldElements = row.select("b");
+            while (continuarPaginar) {
+                // Gerar a URL para a página atual
+                String urlPaginaAtual = urlBase + paginaAtual;
+                Document doc = httpClient.getDocument(urlPaginaAtual);
+                String conteudoPaginaAtual = doc.body().text();
 
-                if (boldElements.size() >= 3) {
-                    Licitacao licitacao = new Licitacao();
-                    analisarElementosEmNegrito(boldElements, licitacao);
-                    licitacao.setNumeroPregao(extrairNumeroPregao(licitacao.getPregao()));
-                    licitacoes.add(licitacao);
-                    //imprimirLicitacao(licitacao);
+                // Verificar se o conteúdo da página atual é o mesmo que o da primeira página
+                if (paginaAtual > 1 && conteudoPaginaAtual.equals(conteudoPrimeiraPagina)) {
+                    System.out.println("Página " + paginaAtual + " retornou ao conteúdo da primeira página. Parando a paginação.");
+                    break; // Interrompe o loop se a página atual for igual à primeira
                 }
+
+                // Processar as licitações da página atual
+                List<Licitacao> licitacoesPagina = processarLicitacoes(doc);
+                licitacoes.addAll(licitacoesPagina);
+
+                System.out.println("Página " + paginaAtual + " processada.");
+                paginaAtual++;
             }
         } catch (Exception e) {
             System.err.println("Erro ao capturar licitações: " + e.getMessage());
         }
+        return licitacoes;
+    }
+
+    private List<Licitacao> processarLicitacoes(Document doc) {
+        List<Licitacao> licitacoes = new ArrayList<>();
+        Elements rows = doc.select("table tr");
+
+        for (Element row : rows) {
+            Elements boldElements = row.select("b");
+
+            if (boldElements.size() >= 3) {
+                Licitacao licitacao = new Licitacao();
+                analisarElementosEmNegrito(boldElements, licitacao);
+                licitacao.setNumeroPregao(extrairNumeroPregao(licitacao.getPregao()));
+                licitacoes.add(licitacao);
+            }
+        }
+
         return licitacoes;
     }
 
@@ -100,7 +128,7 @@ public class ComprasNetLicitacaoScraper implements ILicitacaoScraper {
     }
 
     private String extrairNumeroPregao(String texto) {
-        Pattern pattern = Pattern.compile("(\\d{5}/\\d{4})");
+        Pattern pattern = Pattern.compile("(\\d{1,5}/\\d{4})");
         Matcher matcher = pattern.matcher(texto);
 
         if (matcher.find()) {

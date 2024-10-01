@@ -29,9 +29,14 @@ public class LicitacaoService {
         salvarLicitacoes(licitacoes);
     }
 
+    public List<Licitacao> buscarLicitacoes() {
+        List<Licitacao> licitacoes = licitacaoRepository.findAll();
+        return licitacoes;
+    }
+
     public void salvarLicitacoes(List<Licitacao> licitacoes) {
         for (Licitacao licitacao : licitacoes) {
-            if (!licitacaoRepository.existsByNumeroPregao(licitacao.getNumeroPregao())) {
+            if (!licitacaoRepository.existsByNumeroPregaoAndCodigoUasg(licitacao.getNumeroPregao(), licitacao.getCodigoUasg())) {
                 licitacaoRepository.save(licitacao);
                 System.out.println("Licitacao salva: " + licitacao.getNumeroPregao());
             }
