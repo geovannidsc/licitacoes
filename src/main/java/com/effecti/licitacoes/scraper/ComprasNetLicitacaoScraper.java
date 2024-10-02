@@ -1,6 +1,7 @@
 package com.effecti.licitacoes.scraper;
 
 import com.effecti.licitacoes.http.IHttpClient;
+import com.effecti.licitacoes.model.ItemEdital;
 import com.effecti.licitacoes.model.Licitacao;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -17,10 +18,13 @@ public class ComprasNetLicitacaoScraper implements ILicitacaoScraper {
 
     private final IHttpClient httpClient;
 
+    private final ItensEditalScraper itensEditalScraper;
 
-    public ComprasNetLicitacaoScraper(IHttpClient httpClient) {
+    public ComprasNetLicitacaoScraper(IHttpClient httpClient, ItensEditalScraper itensEditalScraper) {
         this.httpClient = httpClient;
+        this.itensEditalScraper = itensEditalScraper;
     }
+
 
     @Override
     public List<Licitacao> buscarLicitacoes(String urlBase) {
@@ -29,23 +33,19 @@ public class ComprasNetLicitacaoScraper implements ILicitacaoScraper {
         boolean continuarPaginar = true;
 
         try {
-            // Obter conteúdo da página 1 para comparações futuras
             Document primeiraPagina = httpClient.getDocument(urlBase + 1);
-            String conteudoPrimeiraPagina = primeiraPagina.body().text(); // Extrair o texto da primeira página
+            String conteudoPrimeiraPagina = primeiraPagina.body().text();
 
             while (continuarPaginar) {
-                // Gerar a URL para a página atual
                 String urlPaginaAtual = urlBase + paginaAtual;
                 Document doc = httpClient.getDocument(urlPaginaAtual);
                 String conteudoPaginaAtual = doc.body().text();
 
-                // Verificar se o conteúdo da página atual é o mesmo que o da primeira página
                 if (paginaAtual > 1 && conteudoPaginaAtual.equals(conteudoPrimeiraPagina)) {
                     System.out.println("Página " + paginaAtual + " retornou ao conteúdo da primeira página. Parando a paginação.");
-                    break; // Interrompe o loop se a página atual for igual à primeira
+                    break;
                 }
 
-                // Processar as licitações da página atual
                 List<Licitacao> licitacoesPagina = processarLicitacoes(doc);
                 licitacoes.addAll(licitacoesPagina);
 
@@ -58,7 +58,9 @@ public class ComprasNetLicitacaoScraper implements ILicitacaoScraper {
         return licitacoes;
     }
 
-    private List<Licitacao> processarLicitacoes(Document doc) {
+
+
+    private List<Licitacao> processarLicitacoes(Document doc) throws Exception {
         List<Licitacao> licitacoes = new ArrayList<>();
         Elements rows = doc.select("table tr");
 
@@ -69,12 +71,55 @@ public class ComprasNetLicitacaoScraper implements ILicitacaoScraper {
                 Licitacao licitacao = new Licitacao();
                 analisarElementosEmNegrito(boldElements, licitacao);
                 licitacao.setNumeroPregao(extrairNumeroPregao(licitacao.getPregao()));
+
+
+                String urlItens = gerarUrlItens(licitacao.getCodigoUasg(), licitacao.getNumeroPregao(), 5);
+                List<ItemEdital> itens = capturarItensEdital(urlItens, licitacao);
+                licitacao.setItensEdital(itens);
                 licitacoes.add(licitacao);
             }
         }
 
         return licitacoes;
     }
+
+    private List<ItemEdital> capturarItensEdital(String url, Licitacao licitacao) throws Exception {
+        List<ItemEdital> itens = new ArrayList<>();
+        Document document = httpClient.getDocument(url);
+      //  System.out.println("Capturando itens de: " + url);
+
+        if (document == null) {
+            System.err.println("Documento retornado é nulo para a URL: " + url);
+            return itens;
+        }
+
+        itens = itensEditalScraper.capturarItensEdital(document, licitacao);
+
+        if (itens.isEmpty()) {
+            System.out.println("Nenhum item encontrado. Tentando com modprp=3...");
+            String urlModprp3 = gerarUrlItens(licitacao.getCodigoUasg(), licitacao.getNumeroPregao(), 3);
+            Document documentModprp3 = httpClient.getDocument(urlModprp3);
+
+            if (documentModprp3 != null) {
+              //  System.out.println("Capturando itens de (modprp=3): " + urlModprp3);
+                itens = itensEditalScraper.capturarItensEdital(documentModprp3, licitacao);
+            } else {
+                System.err.println("Documento retornado é nulo para a URL: " + urlModprp3);
+            }
+        }
+
+        return itens;
+    }
+
+    private String gerarUrlItens(String codigoUasg, String numeroPregao, int modprp) {
+        String numeroPregaoSemBarra = numeroPregao.replace("/", "");
+        return String.format("http://comprasnet.gov.br/ConsultaLicitacoes/download/download_editais_detalhe.asp?coduasg=%s&modprp=%d&numprp=%s", codigoUasg, modprp, numeroPregaoSemBarra);
+    }
+
+
+
+
+
 
     private void analisarElementosEmNegrito(Elements boldElements, Licitacao licitacao) {
         capturarOrgaoESetor(boldElements.get(0), licitacao);
@@ -122,7 +167,7 @@ public class ComprasNetLicitacaoScraper implements ILicitacaoScraper {
                 .orElse(null);
         if (element != null) {
             String proximoIrmao = element.nextSibling() != null ? element.nextSibling().toString().trim() : "Não informado";
-            return proximoIrmao.replace("&nbsp;", "").trim(); // Remover &nbsp; e espaços desnecessários
+            return proximoIrmao.replace("&nbsp;", "").trim();
         }
         return "Não informado";
     }

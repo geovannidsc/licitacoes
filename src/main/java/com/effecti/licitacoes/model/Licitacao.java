@@ -1,8 +1,11 @@
 package com.effecti.licitacoes.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -28,6 +31,10 @@ public class Licitacao {
 
     private String codigoUasg;
     private boolean lida;
+
+
+    @OneToMany(mappedBy = "licitacao", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ItemEdital> itensEdital = new ArrayList<>();
 
     public Licitacao() {
     }
@@ -143,7 +150,23 @@ public class Licitacao {
     public void setLida(boolean lida) {
         this.lida = lida;
     }
+    public List<ItemEdital> getItensEdital() {
+        return itensEdital;
+    }
 
+    public void setItensEdital(List<ItemEdital> itensEdital) {
+        this.itensEdital = itensEdital;
+    }
+
+    public void addItemEdital(ItemEdital itemEdital) {
+        itensEdital.add(itemEdital);
+        itemEdital.setLicitacao(this);
+    }
+
+    public void removeItemEdital(ItemEdital itemEdital) {
+        itensEdital.remove(itemEdital);
+        itemEdital.setLicitacao(null);
+    }
 
     @Override
     public boolean equals(Object o) {

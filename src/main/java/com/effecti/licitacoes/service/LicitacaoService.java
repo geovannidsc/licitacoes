@@ -5,6 +5,8 @@ import com.effecti.licitacoes.model.Licitacao;
 import com.effecti.licitacoes.repository.LicitacaoRepository;
 import com.effecti.licitacoes.scraper.ILicitacaoScraper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,9 +31,9 @@ public class LicitacaoService {
         salvarLicitacoes(licitacoes);
     }
 
-    public List<Licitacao> buscarLicitacoes() {
-        List<Licitacao> licitacoes = licitacaoRepository.findAll();
-        return licitacoes;
+    public Page<Licitacao> buscarLicitacoes(int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        return licitacaoRepository.findAll(pageRequest);
     }
 
     public void salvarLicitacoes(List<Licitacao> licitacoes) {
