@@ -31,10 +31,27 @@ public class LicitacaoService {
         salvarLicitacoes(licitacoes);
     }
 
-    public Page<Licitacao> buscarLicitacoes(int page, int size) {
+    public Page<Licitacao> buscarLicitacoes(int page, int size, String termo) {
         PageRequest pageRequest = PageRequest.of(page, size);
-        return licitacaoRepository.findAll(pageRequest);
+
+        if (termo == null || termo.isEmpty()) {
+            return licitacaoRepository.findAll(pageRequest);
+        }
+
+        return licitacaoRepository.buscarPorTermo(termo, pageRequest);
     }
+
+
+    public boolean marcarLeitura(String numeroPregao, String codigoUasg) {
+        Licitacao licitacao = licitacaoRepository.findByNumeroPregaoAndCodigoUasg(numeroPregao, codigoUasg);
+        if (licitacao != null) {
+            licitacao.setLida(!licitacao.isLida());
+            licitacaoRepository.save(licitacao);
+            return licitacao.isLida();
+        }
+        throw new RuntimeException("Licitação não encontrada.");
+    }
+
 
     public void salvarLicitacoes(List<Licitacao> licitacoes) {
         for (Licitacao licitacao : licitacoes) {

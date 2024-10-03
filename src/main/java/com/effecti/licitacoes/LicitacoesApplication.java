@@ -5,9 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
 
 
 @SpringBootApplication
+@EnableSpringDataWebSupport(pageSerializationMode = EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO)
 public class LicitacoesApplication implements CommandLineRunner {
 
 	@Autowired
@@ -19,7 +21,7 @@ public class LicitacoesApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) {
-
+/*
 
 		final String urlBase = "http://comprasnet.gov.br/ConsultaLicitacoes/ConsLicitacaoDia.asp?pagina=";
 		String paginahtml = "file:///C:\\Users\\Geovanni\\Desktop\\Codigos\\licitacoes\\src\\main\\resources\\comprasnet.html";
@@ -29,5 +31,9 @@ public class LicitacoesApplication implements CommandLineRunner {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+ */
 	}
+
+
 }
