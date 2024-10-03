@@ -1,3 +1,6 @@
+licitacoes:
+  url-captura-itens: "http://comprasnet.gov.br/ConsultaLicitacoes/download/download_editais_detalhe.asp"
+  url-captura-licitacoes: "http://comprasnet.gov.br/ConsultaLicitacoes/ConsLicitacaoDia.asp?pagina="
 
 spring:
   jpa:

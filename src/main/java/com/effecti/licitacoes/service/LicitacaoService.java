@@ -1,5 +1,6 @@
 package com.effecti.licitacoes.service;
 
+import com.effecti.licitacoes.config.LicitacaoProperties;
 import com.effecti.licitacoes.factory.ILicitacaoScraperFactory;
 import com.effecti.licitacoes.model.Licitacao;
 import com.effecti.licitacoes.repository.LicitacaoRepository;
@@ -18,6 +19,9 @@ public class LicitacaoService {
     private LicitacaoRepository licitacaoRepository;
 
     private final ILicitacaoScraperFactory scraperFactory;
+
+    @Autowired
+    private LicitacaoProperties licitacaoProperties;
 
     @Autowired
     public LicitacaoService(ILicitacaoScraperFactory scraperFactory) {
@@ -62,5 +66,18 @@ public class LicitacaoService {
         }
 
     }
+
+
+    public String gerarUrlItens(String codigoUasg, String numeroPregao, int modprp) {
+        String numeroPregaoSemBarra = numeroPregao.replace("/", "");
+        return String.format("%s?coduasg=%s&modprp=%d&numprp=%s",
+                licitacaoProperties.getUrlCapturaItens(), codigoUasg, modprp, numeroPregaoSemBarra);
+    }
+
+    public String gerarUrlCapturaLicitacoes() {
+        return String.format("%s", licitacaoProperties.getUrlCapturaLicitacoes());
+    }
+
+
 
 }

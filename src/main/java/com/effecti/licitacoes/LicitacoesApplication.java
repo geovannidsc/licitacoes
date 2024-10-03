@@ -12,28 +12,23 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 @EnableSpringDataWebSupport(pageSerializationMode = EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO)
 public class LicitacoesApplication implements CommandLineRunner {
 
-	@Autowired
-	private LicitacaoService licitacaoService;
+    @Autowired
+    private LicitacaoService licitacaoService;
 
-	public static void main(String[] args) {
-		SpringApplication.run(LicitacoesApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(LicitacoesApplication.class, args);
+    }
 
-	@Override
-	public void run(String... args) {
-/*
+    @Override
+    public void run(String... args) {
 
-		final String urlBase = "http://comprasnet.gov.br/ConsultaLicitacoes/ConsLicitacaoDia.asp?pagina=";
-		String paginahtml = "file:///C:\\Users\\Geovanni\\Desktop\\Codigos\\licitacoes\\src\\main\\resources\\comprasnet.html";
+        try {
+            licitacaoService.buscarNovasLicitacoes(licitacaoService.gerarUrlCapturaLicitacoes());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-		try {
-			licitacaoService.buscarNovasLicitacoes(urlBase);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
- */
-	}
+    }
 
 
 }

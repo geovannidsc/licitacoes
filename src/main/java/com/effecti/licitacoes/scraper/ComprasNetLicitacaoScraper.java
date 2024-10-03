@@ -3,9 +3,11 @@ package com.effecti.licitacoes.scraper;
 import com.effecti.licitacoes.http.IHttpClient;
 import com.effecti.licitacoes.model.ItemEdital;
 import com.effecti.licitacoes.model.Licitacao;
+import com.effecti.licitacoes.service.LicitacaoService;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -19,6 +21,9 @@ public class ComprasNetLicitacaoScraper implements ILicitacaoScraper {
     private final IHttpClient httpClient;
 
     private final ItensEditalScraper itensEditalScraper;
+
+  @Autowired
+  private LicitacaoService licitacaoService;
 
     public ComprasNetLicitacaoScraper(IHttpClient httpClient, ItensEditalScraper itensEditalScraper) {
         this.httpClient = httpClient;
@@ -73,7 +78,7 @@ public class ComprasNetLicitacaoScraper implements ILicitacaoScraper {
                 licitacao.setNumeroPregao(extrairNumeroPregao(licitacao.getPregao()));
 
 
-                String urlItens = gerarUrlItens(licitacao.getCodigoUasg(), licitacao.getNumeroPregao(), 5);
+                String urlItens = licitacaoService.gerarUrlItens(licitacao.getCodigoUasg(), licitacao.getNumeroPregao(), 5);
                 List<ItemEdital> itens = capturarItensEdital(urlItens, licitacao);
                 licitacao.setItensEdital(itens);
                 licitacoes.add(licitacao);
@@ -97,7 +102,7 @@ public class ComprasNetLicitacaoScraper implements ILicitacaoScraper {
 
         if (itens.isEmpty()) {
             System.out.println("Nenhum item encontrado. Tentando com modprp=3...");
-            String urlModprp3 = gerarUrlItens(licitacao.getCodigoUasg(), licitacao.getNumeroPregao(), 3);
+            String urlModprp3 = licitacaoService.gerarUrlItens(licitacao.getCodigoUasg(), licitacao.getNumeroPregao(), 3);
             Document documentModprp3 = httpClient.getDocument(urlModprp3);
 
             if (documentModprp3 != null) {
@@ -110,12 +115,6 @@ public class ComprasNetLicitacaoScraper implements ILicitacaoScraper {
 
         return itens;
     }
-
-    private String gerarUrlItens(String codigoUasg, String numeroPregao, int modprp) {
-        String numeroPregaoSemBarra = numeroPregao.replace("/", "");
-        return String.format("http://comprasnet.gov.br/ConsultaLicitacoes/download/download_editais_detalhe.asp?coduasg=%s&modprp=%d&numprp=%s", codigoUasg, modprp, numeroPregaoSemBarra);
-    }
-
 
 
 
