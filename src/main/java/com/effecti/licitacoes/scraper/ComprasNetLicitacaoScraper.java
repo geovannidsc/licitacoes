@@ -19,15 +19,14 @@ import java.util.regex.Pattern;
 public class ComprasNetLicitacaoScraper implements ILicitacaoScraper {
 
     private final IHttpClient httpClient;
-
     private final ItensEditalScraper itensEditalScraper;
+    private final LicitacaoService licitacaoService;
 
-  @Autowired
-  private LicitacaoService licitacaoService;
-
-    public ComprasNetLicitacaoScraper(IHttpClient httpClient, ItensEditalScraper itensEditalScraper) {
+    @Autowired
+    public ComprasNetLicitacaoScraper(IHttpClient httpClient, ItensEditalScraper itensEditalScraper, LicitacaoService licitacaoService) {
         this.httpClient = httpClient;
         this.itensEditalScraper = itensEditalScraper;
+        this.licitacaoService = licitacaoService;
     }
 
 
